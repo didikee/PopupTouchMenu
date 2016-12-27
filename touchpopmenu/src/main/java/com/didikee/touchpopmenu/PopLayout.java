@@ -5,7 +5,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -20,6 +19,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.didikee.touchpopmenu.interf.OnPopLayoutFingerUpListener;
+
+import java.util.HashMap;
 
 /**
  * Created by didik 
@@ -59,14 +60,15 @@ public class PopLayout extends FrameLayout {
         super(context, attrs, defStyleAttr);
         LayoutInflater.from(context).inflate(R.layout.layout_huaban, this, true);
         setFocusable(true);
-        setBackgroundColor(Color.parseColor("#33000000"));
+//        setBackgroundColor(Color.parseColor("#33000000"));
         initActMenu();
+        HashMap<Integer,String> temp=new HashMap<>();
 
         initActParams();
     }
 
     private void initActParams() {
-        radius = DisplayUtil.dp2px(getContext(), 90);
+        radius = dp2px(getContext(), 90);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -85,7 +87,7 @@ public class PopLayout extends FrameLayout {
         iv3.setStateListAnimator(AnimatorInflater.loadStateListAnimator(getContext(), R.animator
                 .pop_layout_item));
 
-        int size = DisplayUtil.dp2px(getContext(), 48);
+        int size = dp2px(getContext(), 48);
         iv1.setImageResource(R.drawable.ic_huaban_edit);
         iv2.setImageResource(R.drawable.ic_huaban_pin);
         iv3.setImageResource(R.drawable.ic_huaban_share);
@@ -402,6 +404,10 @@ public class PopLayout extends FrameLayout {
                 break;
         }
         return true;
+    }
+    public int dp2px(Context context, float dipValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dipValue * scale + 0.5f);
     }
 
     public void setPopLayoutListener(OnPopLayoutFingerUpListener popLayoutListener) {
