@@ -8,12 +8,15 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
@@ -29,11 +32,15 @@ import com.didikee.touchpopmenu.interf.OnPopLayoutFingerUpListener;
 
 public class PopLayout extends FrameLayout {
     private final int totalRadio = 145;//0~~360,最好是0~~180
-    private int radius;
-    private int menuNum = 3;
-    private final float scale = 1.5f;
-    private final int duration=300;
-    private final float endX=0.618f;//表示1/3
+    private final int fixRadio = 30;//弹性空间
+    private final float fixScale=0.5f;//弹性系数
+    private int radius;//射出半径
+    private int menuNum = 3;//数量
+    private final float scale = 1.2f;//放大系数
+    private final int duration=300;//动画时间
+    private final float endX=0.618f;//表示结束后回收的距离
+    private final int itemSize;
+    private double totalRadioPI;
 
     private Pair<Rect, Rect> rectPair1;
     private Pair<Rect, Rect> rectPair2;
@@ -60,12 +67,16 @@ public class PopLayout extends FrameLayout {
         super(context, attrs, defStyleAttr);
         LayoutInflater.from(context).inflate(R.layout.layout_huaban, this, true);
         setFocusable(true);
-//        setBackgroundColor(Color.parseColor("#33000000"));
         initActMenu();
-
+        itemSize = dp2px(getContext(), 48);
 //        HashMap<Integer,String> temp=new HashMap<>();
 
         initActParams();
+        doParams();
+    }
+
+    private void doParams() {
+        totalRadioPI= Math.toRadians(totalRadio);//以PI为计算单位
     }
 
     private void initActParams() {
@@ -88,7 +99,7 @@ public class PopLayout extends FrameLayout {
         iv3.setStateListAnimator(AnimatorInflater.loadStateListAnimator(getContext(), R.animator
                 .pop_layout_item));
 
-        int size = dp2px(getContext(), 48);
+
         iv1.setImageResource(R.drawable.ic_huaban_edit);
         iv2.setImageResource(R.drawable.ic_huaban_pin);
         iv3.setImageResource(R.drawable.ic_huaban_share);
@@ -97,9 +108,9 @@ public class PopLayout extends FrameLayout {
         iv2.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         iv3.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
-        addView(iv1, size, size);
-        addView(iv2, size, size);
-        addView(iv3, size, size);
+        addView(iv1, itemSize, itemSize);
+        addView(iv2, itemSize, itemSize);
+        addView(iv3, itemSize, itemSize);
     }
 
     @Override
@@ -137,11 +148,13 @@ public class PopLayout extends FrameLayout {
      * @param index
      */
     private AnimatorSet createAnimation(View target, int index, boolean start) {
-        float unitAngle = totalRadio * 1.0f / menuNum;
+        //检测边界
+        checkBoundsAndRealRadio();
+        double unitAngle = totalRadioPI * 1.0f / menuNum;
 
         if (index == 1) {
-            float tranX = (float) (sin(unitAngle) * radius);
-            float tranY = (float) (cos(unitAngle) * radius);
+            float tranX = (float) (Math.sin(unitAngle) * radius);
+            float tranY = (float) (Math.cos(unitAngle) * radius);
             Log.e("test", "tranX: " + tranX + "tranY: " + tranY);
             AnimatorSet tranSet = new AnimatorSet();
 
@@ -173,8 +186,8 @@ public class PopLayout extends FrameLayout {
         }
 
         if (index == 3) {
-            float tranX = (float) (sin(unitAngle) * radius);
-            float tranY = (float) (cos(unitAngle) * radius);
+            float tranX = (float) (Math.sin(unitAngle) * radius);
+            float tranY = (float) (Math.cos(unitAngle) * radius);
             Log.e("test", "tranX: " + tranX + "tranY: " + tranY);
 
 
@@ -238,13 +251,84 @@ public class PopLayout extends FrameLayout {
         return null;
     }
 
-    private double sin(float angle) {
-        return Math.sin(Math.toRadians(angle));
-    }
+    /**
+     * 根据位置获取最后摆放的总角度
+     */
+//    private int checkRealRadio() {
+//
+//
+//        if (mGravity == (Gravity.LEFT|Gravity.TOP)){
+//
+//        }
+//
+//    }
 
-    private double cos(float angle) {
-        return Math.cos(Math.toRadians(angle));
+    //    private final int totalRadio = 145;//0~~360,最好是0~~180
+//    private final int fixRadio = 30;//弹性空间
+//    private final float fixScale=0.5f;//弹性系数
+//    private int radius;//射出半径
+    private int mGravity=-1;//默认认为
+    private double checkBoundsAndRealRadio(){
+        double realRadio=0;
+        //获取屏幕的尺寸
+        WindowManager windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        int phoneWidth = displayMetrics.widthPixels;
+        int phoneHeight = displayMetrics.heightPixels;
+
+        //四个边距
+        int left=startX;
+        int top=startY;
+        int right=phoneWidth-left;
+        int bottom=phoneHeight-top;
+
+        int judgeSize= (int) (radius+scale*itemSize/2);//粗略计算
+        int absWidth=-1;
+        int absHeight=-1;
+
+        if (left < judgeSize){
+            mGravity=Gravity.LEFT;
+            absWidth=left;
+        }
+        if (right<judgeSize){
+            mGravity=Gravity.RIGHT;
+            absWidth=right;
+        }
+        if (top < judgeSize){
+            mGravity= mGravity==-1 ? Gravity.TOP : mGravity|Gravity.TOP;
+            absHeight=top;
+        }
+        if (bottom < judgeSize){
+            mGravity= mGravity==-1 ? Gravity.BOTTOM : mGravity|Gravity.BOTTOM;
+            absHeight=bottom;
+        }
+        if (mGravity==-1){
+            mGravity=Gravity.CENTER;
+            realRadio=totalRadioPI;
+        }
+        //弹性系数只对左右有效
+        if (mGravity==Gravity.TOP || mGravity ==Gravity.LEFT || mGravity ==Gravity.RIGHT || mGravity ==Gravity.BOTTOM){
+            realRadio = totalRadioPI >Math.PI ? Math.PI: totalRadioPI;
+        }
+
+        if (absWidth !=-1 && absHeight !=-1){
+            double a1 = Math.acos(absWidth * 1.0 / judgeSize);
+            double a2 = Math.acos(absHeight * 1.0 / judgeSize);
+            double v = Math.toRadians(90);
+            realRadio = 2 * Math.PI - (a1 + a2 + v);
+        }
+
+        return realRadio;
     }
+//
+//    private double sin(float angle) {
+//        return Math.sin(Math.toRadians(angle));
+//    }
+//
+//    private double cos(float angle) {
+//        return Math.cos(Math.toRadians(angle));
+//    }
 
     private boolean isInRect(float x, float y, Rect rect) {
         return (rect != null && (x >= rect.left && x <= rect.right) && (y >= rect.top && y <=
