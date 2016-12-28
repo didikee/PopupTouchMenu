@@ -2,8 +2,10 @@ package com.didikee.touchpopmenu;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,6 +14,8 @@ import android.widget.PopupWindow;
 
 import com.didikee.touchpopmenu.interf.OnPopLayoutFingerUpListener;
 import com.didikee.touchpopmenu.interf.PopHelperListener;
+
+import java.lang.reflect.Method;
 
 /**
  * Created by didik 
@@ -66,8 +70,13 @@ public class PopMenuHelper {
             }
         });
     }
-    public void show(View longClickView,float x, float y){
-        setLocationForPopLayout(x,y);
+    public void show(View longClickView){
+        Point longClickLocation = getLongClickLocation(longClickView);
+        if (longClickLocation==null){
+            Log.e("test","失败了");
+            return;
+        }
+        setLocationForPopLayout(longClickLocation.x,longClickLocation.y);
         eventUtil.updatePopState(true);
         longClickView.dispatchTouchEvent(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_CANCEL, 0, 0, 0));
         getScrollableView().dispatchTouchEvent(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_CANCEL, 0, 0, 0));
@@ -84,5 +93,26 @@ public class PopMenuHelper {
 
     public void setPopListener(PopHelperListener popListener){
         this.popListener=popListener;
+    }
+
+    private Point getLongClickLocation(View longClickView){
+        Class<?> viewClz=View.class;
+        Class<?> viewRootImplClz;
+        Point point=null;
+        try {
+            viewRootImplClz = Class.forName("android.view.ViewRootImpl");
+            Method getViewRootImpl = viewClz.getMethod("getViewRootImpl");
+            Object viewRootImplInstance = getViewRootImpl.invoke(longClickView);
+
+            Method getLastTouchPoint = viewRootImplClz.getMethod("getLastTouchPoint",Point.class);
+            point=new Point();
+            getLastTouchPoint.invoke(viewRootImplInstance, point);
+
+            Log.d("test","point X: "+point.x +"point Y: "+point.y);
+        } catch (Exception e) {
+            Log.d("test","get location fail...");
+        }
+
+        return point;
     }
 }

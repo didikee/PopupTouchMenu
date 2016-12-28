@@ -8,9 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.didikee.touchmenu.view.LongClickLayout;
-import com.didikee.touchpopmenu.interf.OnItemLayoutLongClickListener;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +22,7 @@ public class HuaBanRecyclerAdapter extends RecyclerView.Adapter<MyViewHolder>{
     private Context context;
     private List<Integer> heights;
 //    private OnItemClickListener mListener;
-    private OnItemLayoutLongClickListener mListener;
+    private View.OnLongClickListener mListener;
     public HuaBanRecyclerAdapter(Context context, List<String> lists) {
         this.context = context;
         this.lists = lists;
@@ -41,7 +38,7 @@ public class HuaBanRecyclerAdapter extends RecyclerView.Adapter<MyViewHolder>{
 //        this.mListener = listener;
 //    }
 
-    public void setItemLayoutLongClickListener(OnItemLayoutLongClickListener listener){
+    public void setItemLayoutLongClickListener(View.OnLongClickListener listener){
         this.mListener=listener;
     }
     @Override
@@ -66,23 +63,24 @@ public class HuaBanRecyclerAdapter extends RecyclerView.Adapter<MyViewHolder>{
 //                    mListener.onLongClick(holder.itemView,pos);//把事件交给我们实现的接口那里处理
 //                }
 //            });
-            ((LongClickLayout)holder.itemView).setOnLayoutLongClickListener(new OnItemLayoutLongClickListener() {
-
+            (holder.itemView).setOnLongClickListener(new View.OnLongClickListener() {
 
 
                 @Override
-                public void onLongClick(View v, float x, float y) {
-                    int pos = holder.getLayoutPosition();//得到当前点击item的位置pos
-//                    mListener.onLongClick(holder.itemView,pos,x,y,actionDownForRV);//把事件交给我们实现的接口那里处理
-                    mListener.onLongClick(v,x,y);
+                public boolean onLongClick(View v) {
+                    mListener.onLongClick(v);
+                    return true;
                 }
 
 //                @Override
 //                public void onLongClick(View v, float x, float y) {
-//
+//                    int pos = holder.getLayoutPosition();//得到当前点击item的位置pos
+////                    mListener.onLongClick(holder.itemView,pos,x,y,actionDownForRV);//把事件交给我们实现的接口那里处理
+//                    mListener.onLongClick(v,x,y);
 //                }
+
             });
-            ((LongClickLayout)holder.itemView).setBackgroundColor(Color.parseColor(ColorUtil.random()));
+            (holder.itemView).setBackgroundColor(Color.parseColor(ColorUtil.random()));
         }
     }
 

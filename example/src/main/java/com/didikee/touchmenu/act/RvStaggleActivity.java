@@ -12,7 +12,6 @@ import com.didikee.touchmenu.HuaBanDivier;
 import com.didikee.touchmenu.HuaBanRecyclerAdapter;
 import com.didikee.touchmenu.R;
 import com.didikee.touchpopmenu.PopMenuHelper;
-import com.didikee.touchpopmenu.interf.OnItemLayoutLongClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,14 +43,14 @@ public class RvStaggleActivity extends AppCompatActivity {
         adapter = new HuaBanRecyclerAdapter(this,lists);
         recyclerView.setAdapter(adapter);
         pop = new PopMenuHelper(this,recyclerView);
-        adapter.setItemLayoutLongClickListener(new OnItemLayoutLongClickListener() {
+        adapter.setItemLayoutLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onLongClick(View v, float x, float y) {
-                pop.show(v,x,y);
+            public boolean onLongClick(View v) {
+                pop.show(v);
+                return true;
             }
         });
     }
-
 
     private void initData() {
         lists = new ArrayList();

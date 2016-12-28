@@ -1,7 +1,6 @@
 package com.didikee.touchpopmenu;
 
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -46,7 +45,7 @@ public class MotionEventUtil {
         popMenuHelper.getScrollableView().setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Log.e("test","parent: "+event.getAction());
+//                Log.e("test","parent: "+event.getAction());
                 if ((event.getAction()==MotionEvent.ACTION_UP ||event.getAction()==MotionEvent.ACTION_MOVE) && isPopShow){
                     popMenuHelper.setMotionForPopLayout(event);
                     return true;

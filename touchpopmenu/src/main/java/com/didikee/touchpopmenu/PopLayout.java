@@ -10,6 +10,7 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,8 +20,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.didikee.touchpopmenu.interf.OnPopLayoutFingerUpListener;
-
-import java.util.HashMap;
 
 /**
  * Created by didik 
@@ -39,6 +38,7 @@ public class PopLayout extends FrameLayout {
     private Pair<Rect, Rect> rectPair1;
     private Pair<Rect, Rect> rectPair2;
     private Pair<Rect, Rect> rectPair3;
+    private SparseArray<Pair<Rect,Rect>> itemRect=new SparseArray<>();//normal & scaled
 
     private int startX = -1;
     private int startY = -1;
@@ -62,7 +62,8 @@ public class PopLayout extends FrameLayout {
         setFocusable(true);
 //        setBackgroundColor(Color.parseColor("#33000000"));
         initActMenu();
-        HashMap<Integer,String> temp=new HashMap<>();
+
+//        HashMap<Integer,String> temp=new HashMap<>();
 
         initActParams();
     }

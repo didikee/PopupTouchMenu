@@ -1,17 +1,16 @@
 package com.didikee.touchmenu.act;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.TextView;
 
 import com.didikee.touchmenu.R;
-import com.didikee.touchmenu.view.LongTextView;
 import com.didikee.touchpopmenu.PopMenuHelper;
-import com.didikee.touchpopmenu.interf.OnItemLayoutLongClickListener;
 
 public class SingleTextViewActivity extends AppCompatActivity {
 
-    private LongTextView longTextView;
+    private TextView longTextView;
     private PopMenuHelper menuHelper;
 
     @Override
@@ -20,13 +19,14 @@ public class SingleTextViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_single_text_view);
         View rootview = findViewById(R.id.activity_single_text_view);
 
-        longTextView = ((LongTextView) findViewById(R.id.textView));
+        longTextView = ((TextView) findViewById(R.id.textView));
 
         menuHelper = new PopMenuHelper(this,rootview);
-        longTextView.setOnLayoutLongClickListener(new OnItemLayoutLongClickListener() {
+        longTextView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onLongClick(View v, float x, float y) {
-                menuHelper.show(v,x,y);
+            public boolean onLongClick(View v) {
+                menuHelper.show(v);
+                return true;
             }
         });
 
